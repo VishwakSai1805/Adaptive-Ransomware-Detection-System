@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Parallel IDS Visualizer</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background-color: #1e1e2f; 
+            color: white; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+
+        h1 { 
+            color: #00e5ff; 
+            margin-bottom: 0px; 
+        }
+
+        p { 
+            color: #8892b0; 
+            margin-bottom: 20px; 
+        }
+        
+        .main-container { 
+            display: flex; 
+            gap: 40px; 
+        }
+
+        .engine-panel { 
+            background: #2a2a40; 
+            padding: 20px; 
+            border-radius: 15px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px;
+        }
+        
+        h3 { 
+            margin: 0; 
+            color: #ccc; 
+            text-align: center; 
+            border-bottom: 1px solid #444; 
+            padding-bottom: 10px; 
+        }
+
+        /* The Nodes */
+        .diagram { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+        }
+
+        .node { 
+            width: 100px; 
+            height: 100px; 
+            border-radius: 50%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: bold; 
+            text-align: center; 
+            border: 3px solid #444; 
+            opacity: 0.3; 
+            transition: all 0.3s ease; 
+            font-size: 12px;
+        }
+
+        .arrow { 
+            font-size: 20px; 
+            color: #555; 
+        }
+        
+        /* State Colors */
+        .safe-node { 
+            background-color: #28a745; 
+            color: white; 
+        }
+
+        .susp-node { 
+            background-color: #ffc107; 
+            color: black; 
+        }
+
+        .comp-node { 
+            background-color: #dc3545; 
+            color: white; 
+            border: 5px double #fff; 
+        }
+        
+        /* Active State Glow */
+        .active { 
+            opacity: 1; 
+            border-color: white; 
+            box-shadow: 0 0 20px currentColor; 
+            transform: scale(1.1); 
+        }
+
+        /* Controls */
+        .controls { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+            width: 250px; 
+            background: #2a2a40; 
+            padding: 20px; 
+            border-radius: 15px;
+        }
+
+        button { 
+            padding: 10px; 
+            background: #3f3f5a; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: 0.2s; 
+            font-size: 13px;
+        }
+
+        button:hover { 
+            background: #5a5a80; 
+        }
+        
+        .file-btn { 
+            border-left: 4px solid #00e5ff; 
+        }
+
+        .net-btn { 
+            border-left: 4px solid #ff00ff; 
+        }
+
+        .reset-btn { 
+            background: #00e5ff; 
+            color: black; 
+            margin-top: 10px; 
+            border: none;
+        }
+
+        .reset-btn:hover { 
+            background: #00b3cc; 
+        }
+
+        /* Supervisor Alarm */
+        #supervisor-alarm { 
+            width: 100%; 
+            padding: 15px; 
+            text-align: center; 
+            font-weight: bold; 
+            font-size: 18px; 
+            border-radius: 8px; 
+            background: #222; 
+            color: #555; 
+            margin-top: 20px; 
+            transition: 0.3s; 
+            border: 2px solid #444;
+        }
+
+        .alarm-triggered { 
+            background: #ff0000 !important; 
+            color: white !important; 
+            box-shadow: 0 0 30px #ff0000; 
+            border-color: white !important; 
+            animation: blink 1s infinite; 
+        }
+
+        @keyframes blink { 50% { opacity: 0.8; } }
+
+        /* Logs */
+        .log-box { 
+            margin-top: 20px; 
+            background: #111; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            height: 120px; 
+            overflow-y: auto; 
+            font-size: 13px; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+
+        .log-entry { 
+            margin: 5px 0; 
+            border-bottom: 1px solid #333; 
+            padding-bottom: 5px; 
+        }
+        
+    </style>
+</head>
+<body>
+
+    <h1>Adaptive Ransomware Detection</h1>
+    <p>Phase 1: Product Automata Visualizer</p>
+
+    <div class="main-container">
+        <div class="engine-panel">
+            <h3>Engine 1: File System DFA</h3>
+            <div class="diagram" id="file-diagram">
+                <div id="FILE_SAFE" class="node safe-node active">SAFE<br>(I/O)</div><div class="arrow">➔</div>
+                <div id="FILE_SUSP" class="node susp-node">SUSPICIOUS<br>(Rename)</div><div class="arrow">➔</div>
+                <div id="FILE_COMP" class="node comp-node">COMPROMISED<br>(Encrypted)</div>
+            </div>
+
+            <h3 style="margin-top: 10px;">Engine 2: Network DFA</h3>
+            <div class="diagram" id="net-diagram">
+                <div id="NET_SAFE" class="node safe-node active">SAFE<br>(Traffic)</div><div class="arrow">➔</div>
+                <div id="NET_SUSP" class="node susp-node">SUSPICIOUS<br>(Port Scan)</div><div class="arrow">➔</div>
+                <div id="NET_COMP" class="node comp-node">COMPROMISED<br>(Exploit)</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <h3 style="border:none; padding:0;">Inject Logs</h3>
+            
+            <button class="file-btn" onclick="sendEvent('FILE', 'read_write')">[FILE] read / write</button>
+            <button class="file-btn" onclick="sendEvent('FILE', 'rapid_rename')">[FILE] rapid_rename</button>
+            <button class="file-btn" onclick="sendEvent('FILE', 'encrypt_call')">[FILE] encrypt_call</button>
+            
+            <div style="height: 10px;"></div>
+
+            <button class="net-btn" onclick="sendEvent('NET', 'dns_query')">[NET] dns_query</button>
+            <button class="net-btn" onclick="sendEvent('NET', 'port_scan_445')">[NET] port_scan_445</button>
+            <button class="net-btn" onclick="sendEvent('NET', 'smb_exploit')">[NET] smb_exploit</button>
+
+            <button class="reset-btn" onclick="resetEngine()">Reset Simulation</button>
+        </div>
+    </div>
+
+    <div style="width: 800px;">
+        <div id="supervisor-alarm">SUPERVISOR: MONITORING PARALLEL THREADS...</div>
+        
+        <div class="log-box" id="terminal">
+            <div class="log-entry" style="color: #00e5ff;">System Initialized. Product Tuple: (SAFE, SAFE).</div>
+        </div>
+    </div>
+
+    <script>
+        let fileState = 'SAFE';
+        let netState = 'SAFE';
+        let alarmFired = false;
+
+        const fileTransitions = {
+            'SAFE': { 'read_write': 'SAFE', 'rapid_rename': 'SUSP' },
+            'SUSP': { 'read_write': 'SAFE', 'encrypt_call': 'COMP' },
+            'COMP': { 'read_write': 'COMP', 'rapid_rename': 'COMP', 'encrypt_call': 'COMP' }
+        };
+
+        const netTransitions = {
+            'SAFE': { 'dns_query': 'SAFE', 'port_scan_445': 'SUSP' },
+            'SUSP': { 'dns_query': 'SAFE', 'smb_exploit': 'COMP' },
+            'COMP': { 'dns_query': 'COMP', 'port_scan_445': 'COMP', 'smb_exploit': 'COMP' }
+        };
+
+        function sendEvent(domain, event) {
+            let nextState;
+            if (domain === 'FILE') {
+                nextState = fileTransitions[fileState][event];
+                if (nextState) {
+                    fileState = nextState;
+                    updateVisuals('FILE', fileState);
+                }
+            } else if (domain === 'NET') {
+                nextState = netTransitions[netState][event];
+                if (nextState) {
+                    netState = nextState;
+                    updateVisuals('NET', netState);
+                }
+            }
+
+            if (nextState) {
+                logMessage(`[${domain}] Event '${event}' processed. Tuple -> (${fileState}, ${netState})`);
+                checkSupervisor();
+            }
+        }
+
+        function updateVisuals(domain, newState) {
+            document.getElementById(`${domain}_SAFE`).classList.remove('active');
+            document.getElementById(`${domain}_SUSP`).classList.remove('active');
+            document.getElementById(`${domain}_COMP`).classList.remove('active');
+            
+            document.getElementById(`${domain}_${newState}`).classList.add('active');
+        }
+
+        function checkSupervisor() {
+            if (fileState === 'COMP' && netState === 'COMP' && !alarmFired) {
+                alarmFired = true;
+                document.getElementById('supervisor-alarm').innerText = "!!! CRITICAL: WANNACRY RANSOMWARE INTERSECTION REACHED !!!";
+                document.getElementById('supervisor-alarm').classList.add('alarm-triggered');
+                logMessage(`[!!!] SUPERVISOR TRAP STATE REACHED. SYSTEM HALTED. [!!!]`, '#ff4d4d');
+            }
+        }
+
+        function logMessage(msg, color = '#aaa') {
+            const terminal = document.getElementById('terminal');
+            terminal.innerHTML += `<div class="log-entry" style="color: ${color};">> ${msg}</div>`;
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+
+        function resetEngine() {
+            fileState = 'SAFE';
+            netState = 'SAFE';
+            alarmFired = false;
+            
+            updateVisuals('FILE', 'SAFE');
+            updateVisuals('NET', 'SAFE');
+            
+            let alarm = document.getElementById('supervisor-alarm');
+            alarm.innerText = "SUPERVISOR: MONITORING PARALLEL THREADS...";
+            alarm.classList.remove('alarm-triggered');
+
+            document.getElementById('terminal').innerHTML = '<div class="log-entry" style="color: #00e5ff;">System Reset. Product Tuple: (SAFE, SAFE).</div>';
+        }
+    </script>
+</body>
+</html>

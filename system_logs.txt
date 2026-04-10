@@ -1,0 +1,9 @@
+FILE_SYS,read
+FILE_SYS,read
+NETWORK,dns_query
+FILE_SYS,write
+NETWORK,http_get
+FILE_SYS,rapid_rename
+NETWORK,port_scan_445
+FILE_SYS,encrypt_call
+NETWORK,smb_exploit
