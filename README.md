@@ -5,7 +5,7 @@ This repository contains the source code, visualizer, and documentation for a be
 ## Contents
 * `main.py`: The core O(n) transition engine mapping the File System and Network DFAs.
 * `visualizer.html`: A localized, interactive web dashboard simulating real-time state transitions and Product Automata intersections.
-* `Final_Report.docx`: The complete theoretical breakdown and case study against the WannaCry behavioral signature.
+* `TOC_Project_Report_Final.docx`: The complete theoretical breakdown and case study against the WannaCry behavioral signature.
 
 ## Authors
 * Gudivada Vishwak Sai
